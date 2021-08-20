@@ -97,25 +97,10 @@
 	}
 
 
-		function _shop_api_call_limit_param($index, $response_headers)
-		{
-			$params = explode('/', $response_headers['http_x_shopify_shop_api_call_limit']);
-			return (int) $params[$index];
-		}
-
-
-	class CurlException extends \Exception { }
-	class Exception extends \Exception
+	function _shop_api_call_limit_param($index, $response_headers)
 	{
-		protected $info;
-
-		function __construct($info)
-		{
-			$this->info = $info;
-			parent::__construct($info['response_headers']['http_status_message'], $info['response_headers']['http_status_code']);
-		}
-
-		function getInfo() { $this->info; }
+		$params = explode('/', $response_headers['http_x_shopify_shop_api_call_limit']);
+		return (int) $params[$index];
 	}
 
 
@@ -129,6 +114,19 @@
 	{
 		return "https://$api_key:$password@$shop/";
 
+	}
+	class Exception extends \Exception { }
+	class CurlException extends Exception { }
+	class ApiException extends Exception
+	{
+		function __construct($message, $code, $request, $response=array(), Exception $previous=null)
+		{
+			$response_body_json = isset($response['body']) ? $response['body'] : '';
+			$response = json_decode($response_body_json, true);
+			$response_error = isset($response['errors']) ? ' '.var_export($response['errors'], true) : '';
+			$this->message = $message.$response_error;
+			parent::__construct($this->message, $code, $request, $response, $previous);
+		}
 	}
 
 ?>
