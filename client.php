@@ -59,24 +59,24 @@
 		};
 	}
 
-		function _api($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array())
+	function _api($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array())
+	{
+		try
 		{
-			try
-			{
-				$response = wcurl($method, $url, $query, $payload, $request_headers, $response_headers);
-			}
-			catch(WcurlException $e)
-			{
-				throw new CurlException($e->getMessage(), $e->getCode());
-			}
-
-			$response = json_decode($response, true);
-
-			if (isset($response['errors']) or ($response_headers['http_status_code'] >= 400))
-					throw new ApiException(compact('method', 'path', 'params', 'response_headers', 'response', 'shops_myshopify_domain', 'shops_token'));
-
-			return (is_array($response) and !empty($response)) ? array_shift($response) : $response;
+			$response = wcurl($method, $url, $query, $payload, $request_headers, $response_headers);
 		}
+		catch(WcurlException $e)
+		{
+			throw new CurlException($e->getMessage(), $e->getCode());
+		}
+
+		$response = json_decode($response, true);
+
+		if (isset($response['errors']) or ($response_headers['http_status_code'] >= 400))
+				throw new ApiException(compact('method', 'path', 'params', 'response_headers', 'response', 'shops_myshopify_domain', 'shops_token'));
+
+		return (is_array($response) and !empty($response)) ? array_shift($response) : $response;
+	}
 
 
 	function calls_made($response_headers)
